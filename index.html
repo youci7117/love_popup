@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>给你的甜甜小提示 💗</title>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #ffd6e7, #ffeaf3);
+            font-family: "Microsoft YaHei", sans-serif;
+            overflow: hidden;
+        }
+
+        .popup {
+            position: absolute;
+            padding: 18px 22px;
+            background: #ffe3ee;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(255, 120, 160, 0.4);
+            font-size: 16px;
+            animation: fadeIn 0.4s;
+            color: #ff4f95;
+            max-width: 200px;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: scale(0.6);}
+            to   {opacity: 1; transform: scale(1);}
+        }
+
+        /* 漂浮的爱心 */
+        .heart {
+            position: fixed;
+            font-size: 20px;
+            color: #ff6fa8;
+            animation: floatUp 2s ease-out;
+        }
+
+        @keyframes floatUp {
+            from {opacity: 1; transform: translateY(0);}
+            to   {opacity: 0; transform: translateY(-80px);}
+        }
+
+        .title-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            background-color: #ff9ecb;
+            border-radius: 18px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 120, 160, 0.4);
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="title-box">给你的小小提示 💗</div>
+
+    <script>
+        const messages = [
+            "我好喜欢你 💗",
+            "你是我每天的心动来源！",
+            "抱一个好不好 (*˘︶˘*).｡*♡",
+            "你在我心里是最特别的存在。",
+            "今天也要一直喜欢我喔～",
+            "看到你我就忍不住笑了。",
+            "想你，真的很想你。",
+            "你真的好可爱，我没骗你。"
+        ];
+
+        function randomPopup() {
+            const popup = document.createElement("div");
+            popup.className = "popup";
+            popup.innerText = messages[Math.floor(Math.random() * messages.length)];
+
+            popup.style.left = Math.random() * (window.innerWidth - 200) + "px";
+            popup.style.top = Math.random() * (window.innerHeight - 100) + "px";
+
+            document.body.appendChild(popup);
+
+            setTimeout(() => popup.remove(), 3500);
+        }
+
+        // 漂浮爱心效果
+        function floatingHeart(x, y) {
+            const heart = document.createElement("div");
+            heart.className = "heart";
+            heart.innerText = "💗";
+
+            heart.style.left = x + "px";
+            heart.style.top = y + "px";
+
+            document.body.appendChild(heart);
+
+            setTimeout(() => heart.remove(), 2000);
+        }
+
+        // 每次点击产生爱心
+        document.addEventListener("click", (e) => {
+            floatingHeart(e.clientX, e.clientY);
+        });
+
+        // 自动弹出甜甜提示
+        setInterval(randomPopup, 1200);
+    </script>
+</body>
+</html>
