@@ -52,7 +52,27 @@
         transition: opacity 1.2s ease;
     }
 
-    /* --- 恋爱弹窗 --- */
+    /* --- 小句子弹窗（自动跳出） --- */
+    #miniPopup {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #ffdaf0;
+        padding: 15px 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+        font-size: 16px;
+        display: none;
+        animation: miniFade 0.8s;
+        z-index: 998;
+    }
+
+    @keyframes miniFade {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- 主弹窗 --- */
     #lovePopup {
         position: fixed;
         top: 50%;
@@ -67,6 +87,11 @@
         display: none;
         z-index: 999;
         animation: fadeIn 0.8s;
+    }
+
+    #lovePopup img {
+        width: 150px;
+        margin-bottom: 15px;
     }
 
     @keyframes fadeIn {
@@ -94,14 +119,22 @@
     <button id="startBtn">进入</button>
 </div>
 
-<!-- 主画面内容 -->
+<!-- 主画面 -->
 <div id="mainContent">
-    <!-- 恋爱弹窗 -->
+
+    <!-- 小句子弹窗 -->
+    <div id="miniPopup">
+        💬 想偷偷告诉你一件事...
+    </div>
+
+    <!-- 主恋爱弹窗（含图片） -->
     <div id="lovePopup">
+        <img src="cute.png" alt="">
         <h2>我想跟你说：</h2>
         <p>你是我每天最最最期待的人 💗</p>
-        <button onclick="closePopup()">好啦~</button>
+        <button onclick="closeLovePopup()">好啦~</button>
     </div>
+
 </div>
 
 <!-- 背景音乐 -->
@@ -133,13 +166,18 @@ document.getElementById("startBtn").onclick = function () {
         }
     }, 150);
 
-    // 显示弹窗
+    // 小句子弹窗（先出现）
+    setTimeout(() => {
+        document.getElementById("miniPopup").style.display = "block";
+    }, 600);
+
+    // 主弹窗（再出现）
     setTimeout(() => {
         document.getElementById("lovePopup").style.display = "block";
-    }, 800);
+    }, 1500);
 };
 
-function closePopup() {
+function closeLovePopup() {
     document.getElementById("lovePopup").style.display = "none";
 }
 </script>
