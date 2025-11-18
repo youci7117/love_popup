@@ -1,255 +1,400 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Love Popup</title>
-
 <style>
-    body {
-        margin: 0;
-        font-family: "Comic Sans MS", "Microsoft JhengHei", sans-serif;
-        background-color: #ffe6f2;
-        overflow: hidden;
-    }
+/* ---------- 基础 ---------- */
+:root{
+  --bg1:#ffdff0;
+  --bg2:#ffe8f6;
+  --accent:#ff6fa8;
+  --card:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:"Microsoft JhengHei", "PingFang TC", "Noto Sans", sans-serif;
+  background: linear-gradient(135deg,var(--bg1),var(--bg2));
+  overflow:hidden;
+  -webkit-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+}
 
-    /* --- 进入画面 --- */
-    #startScreen {
-        position: fixed;
-        inset: 0;
-        background: linear-gradient(135deg, #ffb6c1, #ffcbe6);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        z-index: 1000;
-    }
+/* ---------- 进入画面 ---------- */
+#startScreen{
+  position:fixed; inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  z-index:1200;
+  background: linear-gradient(135deg,#ffb6c1,#ffcbe6);
+  transition:opacity .6s;
+}
+#startScreen h1{
+  color:#fff;
+  font-size:30px;
+  margin:0 0 18px 0;
+  text-shadow:0 6px 18px rgba(255,120,160,0.3);
+}
+#startBtn{
+  background:#fff;
+  color:var(--accent);
+  border:none;
+  padding:12px 28px;
+  font-size:18px;
+  border-radius:28px;
+  cursor:pointer;
+  box-shadow:0 6px 20px rgba(255,105,180,0.25);
+  transition:transform .16s;
+}
+#startBtn:active{transform:scale(.98);}
 
-    #startScreen h1 {
-        font-size: 32px;
-        color: white;
-        margin-bottom: 20px;
-    }
+/* ---------- 主画面容器 ---------- */
+#mainContent{opacity:0; transition:opacity 1.0s ease; position:relative; height:100vh;}
 
-    #startBtn {
-        padding: 12px 30px;
-        font-size: 20px;
-        background: white;
-        color: #ff5fa2;
-        border: none;
-        border-radius: 30px;
-        cursor: pointer;
-        box-shadow: 0px 4px 10px rgba(255, 105, 180, 0.5);
-        transition: 0.3s;
-    }
-    #startBtn:hover { transform: scale(1.05); }
+/* ---------- 小句子角落弹窗 (mini) ---------- */
+#miniPopup{
+  position:fixed;
+  right:26px;
+  bottom:26px;
+  background:#ffdaf0;
+  padding:14px 18px;
+  border-radius:14px;
+  box-shadow:0 6px 22px rgba(255,105,180,0.14);
+  color:var(--accent);
+  font-size:15px;
+  display:none;
+  z-index:1005;
+}
 
-    /* --- 主内容区 --- */
-    #mainContent {
-        opacity: 0;
-        transition: opacity 1.2s ease;
-    }
+/* ---------- 通用弹窗样式（用于 JS 生成） ---------- */
+.popup {
+  position:fixed;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:12px;
+  border-radius:16px;
+  background:var(--card);
+  box-shadow:0 10px 30px rgba(255,105,180,0.18);
+  z-index:1000;
+  opacity:0;
+  transform:translateY(10px) scale(0.98);
+  animation:popupIn .35s forwards;
+  pointer-events:auto;
+}
 
-    /* --- 小句子弹窗 --- */
-    #miniPopup {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        background: #ffdaf0;
-        padding: 15px 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
-        font-size: 16px;
-        display: none;
-        animation: miniFade 0.8s;
-        z-index: 998;
-    }
+/* 大图片弹窗专用 */
+.popup.image {
+  width:320px;              /* 图片弹窗更大 */
+  padding:10px;
+}
+.popup.image img{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:12px;
+  border:6px solid #fff;    /* 白边（较小） */
+  box-shadow:0 8px 20px rgba(255,105,180,0.12);
+}
 
-    @keyframes miniFade {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+/* 文字弹窗专用（较小） */
+.popup.text {
+  min-width:220px;
+  max-width:260px;
+  padding:14px 16px;
+  font-size:16px;
+  color:var(--accent);
+  background: linear-gradient(180deg,#fff,#fff);
+  border-radius:14px;
+  border:1px solid rgba(255,110,160,0.06);
+  box-shadow:0 10px 30px rgba(255,105,180,0.08);
+}
 
-    /* --- 主弹窗固定样式 --- */
-    .popupBox {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 280px;
-        padding: 25px;
-        background: white;
-        border-radius: 20px;
-        text-align: center;
-        display: none;
-        z-index: 999;
-        box-shadow: 0 5px 25px rgba(255, 105, 180, 0.35);
-        animation: fadeIn 0.8s;
-    }
+/* 弹窗淡入关键帧 */
+@keyframes popupIn{
+  0% { opacity:0; transform: translateY(10px) scale(0.98); }
+  60% { opacity:1; transform: translateY(-6px) scale(1.02); }
+  100% { opacity:1; transform: translateY(0px) scale(1); }
+}
 
-    .popupBox img {
-        width: 150px;
-        margin-bottom: 15px;
-    }
+/* 弹窗淡出（JS 添加类后触发） */
+.popup.hide {
+  transition: transform .5s, opacity .5s;
+  opacity:0 !important;
+  transform: translateY(-24px) scale(.96) !important;
+}
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translate(-50%, -60%); }
-        to { opacity: 1; transform: translate(-50%, -50%); }
-    }
-
-    /* --- 点击冒出小爱心 --- */
+/* ---------- 点击冒出小爱心 ---------- */
 .heart {
-    position: absolute;
-    font-size: 20px;
-    color: #ff5fa2;
-    animation: floatUp 1s ease-out forwards;
-    pointer-events: none;
+  position:absolute;
+  font-size:20px;
+  color:var(--accent);
+  pointer-events:none;
+  animation:heartUp 1000ms ease-out forwards;
+  z-index:1300;
+}
+@keyframes heartUp {
+  0% { opacity:1; transform:translateY(0) scale(1); }
+  100%{ opacity:0; transform:translateY(-70px) scale(1.6); }
 }
 
-@keyframes floatUp {
-    0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-40px) scale(1.4);
-    }
-}
-
-    
+/* 限制同时存在的弹窗数量（视觉优化） */
 </style>
 </head>
-
 <body>
 
 <!-- 进入画面 -->
 <div id="startScreen">
-    <h1>💕 给你的小惊喜 💕</h1>
-    <button id="startBtn">进入</button>
+  <h1>💕 给你的小惊喜 💕</h1>
+  <button id="startBtn">进入</button>
 </div>
 
-<!-- 主画面 -->
+<!-- 主内容 -->
 <div id="mainContent">
 
-    <!-- 小句子弹窗 -->
-    <div id="miniPopup">💬 想偷偷告诉你一件事...</div>
+  <!-- 小句子弹窗 -->
+  <div id="miniPopup">💬 想偷偷告诉你一件事...</div>
 
-    <!-- 主告白弹窗 -->
-    <div id="popup1" class="popupBox">
-        <img src="2025102419201.png" alt="">
-        <h2>我想跟你说：</h2>
-        <p>你是我每天最最最期待的人 💗</p>
-    </div>
-
-    <!-- D 模式：文字弹窗 -->
-    <div id="popup2" class="popupBox">
-        <p>其实啊，每次看到你我都会超级开心 ✨</p>
-    </div>
-
-    <!-- E 模式：图片弹窗 -->
-    <div id="popup3" class="popupBox">
-        <img src="20251015181155.png">
-        <p>送你小花花 🌸</p>
-    </div>
-    
-    <div id="popup4" class="popupBox">
-    <p>这是第四个弹窗 💞</p>
-    </div
-
-           <div id="popup4" class="popupBox">
-    <p>这是第五个弹窗 💞</p>
-    </div>
+  <!-- 动态弹窗区域（JS 会在 body 上生成实际弹窗元素） -->
 
 </div>
 
-<!-- 背景音乐 -->
-<audio id="bgm" src="hvpbo-khuht.mp3"></audio>
+<!-- 背景音乐（请把文件放同目录，若无则不会播放） -->
+<audio id="bgm" src="hvpbo-khuht.mp3" preload="auto"></audio>
 
 <script>
-document.getElementById("startBtn").onclick = function () {
+/* ================= 配置区域（如要改名字/数量可在这修改） ================= */
+// 28 张图片（按你给的文件名顺序）
+const imageFiles = [
+"20251015181155.png","2025102419201.png","202510319582.png","2025105231052.png",
+"202511115542.png","2025111216234.png","2025111323412.png","2025712223424.png",
+"2025712225433.png","2025712225934.png","2025716145.png","202573014642.png",
+"202574123.png","20257513233.png","2025770216.png","20258103110.png",
+"202581123535.png","202581811226.png","202581812236.png","20258181841.png",
+"20258280282.png","2025891106.png","2025891567.png","202591303746.png",
+"2025928211642.png","2025928231020.png","202596195817.png","202596211548.png"
+];
 
-    // 关闭进入画面
-    document.getElementById("startScreen").style.display = "none";
+// 10 条文字（已转换为简体，按你提供的内容）
+const textMessages = [
+"喜欢一个侠缘",
+"今天也要开心！",
+"侠缘高不高级呀！",
+"侠缘是最厉害的！",
+"侠缘萌萌",
+"我亲亲你",
+"我是侠缘的小狗！",
+"老公！",
+"我喜欢你！",
+"萌鼠了"
+];
 
-    // 主画面淡入
-    document.getElementById("mainContent").style.opacity = 1;
+// 控制参数
+const SPAWN_INTERVAL = 700;      // 每次触发弹窗组的间隔(ms)
+const POPUPS_PER_SPAWN = 4;      // 每个触发周期会弹出的弹窗总数（图片+文字混合）
+const MAX_SIMULTANEOUS = 20;     // 页面上最多同时存在的弹窗
+const POPUP_SHOW_TIME = 2800;    // 每个弹窗显示时长(ms)
+const IMAGE_BORDER_PX = 6;       // 图片白边像素（已在 CSS 中）
+/* ================= 结束配置区域 ================= */
 
-    // 背景音乐淡入
-    let bgm = document.getElementById("bgm");
-    let volume = 0;
-    bgm.volume = 0;
-    bgm.play();
+let started = false;
+let imageIndex = 0;
+let textIndex = 0;
+let activePopups = 0;
+let spawnTimer = null;
 
-    let fadeIn = setInterval(() => {
-        if (volume < 0.5) {
-            volume += 0.02;
-            bgm.volume = volume;
-        } else {
-            clearInterval(fadeIn);
-        }
-    }, 150);
+/* ---------- 进入按钮逻辑（开始一切） ---------- */
+const startBtn = document.getElementById('startBtn');
+startBtn.addEventListener('click', ()=> {
+  if (started) return;
+  started = true;
 
-    // 小句子弹窗最先出现
-    setTimeout(() => {
-        document.getElementById("miniPopup").style.display = "block";
-    }, 600);
+  // 隐藏进入画面
+  const intro = document.getElementById('startScreen');
+  intro.style.opacity = 0;
+  setTimeout(()=> intro.style.display = 'none', 600);
 
-    // 让 miniPopup 自动消失
-    setTimeout(() => {
-        document.getElementById("miniPopup").style.display = "none";
-    }, 2000);
+  // 显示 mainContent
+  document.getElementById('mainContent').style.opacity = 1;
 
-    // 🚀 弹窗轮播系统
-    let popups = ["popup1", "popup2", "popup3"];  
-    let index = 0;
+  // 播放并淡入 BGM（当用户交互时浏览器允许播放）
+  fadeInBGM();
 
-    function showNextPopup() {
-        if (index >= popups.length) return;
+  // 显示 miniPopup（角落提示）
+  setTimeout(()=> {
+    const mini = document.getElementById('miniPopup');
+    mini.style.display = 'block';
+    // 自动消失
+    setTimeout(()=> mini.style.display = 'none', 2600);
+  }, 600);
 
-        let id = popups[index];
-        let popup = document.getElementById(id);
-
-        // 显示
-        popup.style.display = "block";
-
-        // 2.5 秒后自动关闭
-        setTimeout(() => {
-            popup.style.display = "none";
-            index++;
-            showNextPopup();  // 继续播放下一个
-        }, 2500);
-    }
-
-    // 主弹窗轮播在 1.6 秒后开始
-    setTimeout(showNextPopup, 1600);
-
-};
-
-// 点击冒出小爱心
-document.addEventListener("click", function(e) {
-
-    // 不在进入画面时才产生爱心
-    if (document.getElementById("startScreen").style.display !== "none") return;
-
-    let heart = document.createElement("div");
-    heart.className = "heart";
-    heart.innerText = "❤";
-
-    // 设置出现位置
-    heart.style.left = e.clientX + "px";
-    heart.style.top = e.clientY + "px";
-
-    document.body.appendChild(heart);
-
-    // 1 秒后删除
-    setTimeout(() => {
-        heart.remove();
-    }, 1000);
+  // 启动弹窗持续生成（轮播）
+  setTimeout(()=> {
+    spawnTimer = setInterval(spawnGroup, SPAWN_INTERVAL);
+  }, 1300);
 });
 
-    
-</script>
+/* ---------- 背景音乐淡入 ---------- */
+function fadeInBGM(){
+  const bgm = document.getElementById('bgm');
+  if (!bgm) return;
+  bgm.volume = 0;
+  const p = bgm.play();
+  if (p !== undefined) {
+    p.catch(()=>{/* 自动播放被阻止 */});
+  }
+  let vol = 0;
+  const iv = setInterval(()=>{
+    vol += 0.02;
+    bgm.volume = Math.min(vol, 0.45); // 最大音量 0.45
+    if (vol >= 0.45) clearInterval(iv);
+  }, 150);
+}
 
+/* ---------- 点击任意位置冒出小爱心 ---------- */
+document.addEventListener('click', function(e){
+  if (!started) return; // 只有按了进入按钮后才响应
+  // 如果用户点击了按钮导致触发开始，不要重复生成爱心（允许即可）
+  createHeartAt(e.clientX, e.clientY);
+});
+function createHeartAt(x,y){
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.textContent = '❤';
+  heart.style.left = (x - 8) + 'px';
+  heart.style.top = (y - 10) + 'px';
+  document.body.appendChild(heart);
+  setTimeout(()=> heart.remove(), 1000);
+}
+
+/* ---------- 弹窗生成逻辑：每次 spawnGroup 会产生若干个 popup（图片/文本混合） ---------- */
+function spawnGroup(){
+  // 如果页面上弹窗太多，则跳过本次生成，等待下个周期
+  if (activePopups >= MAX_SIMULTANEOUS) return;
+
+  // 生成 POPUPS_PER_SPAWN 个弹窗（图片与文字按顺序混合）
+  for (let i=0;i<POPUPS_PER_SPAWN;i++){
+    // 决定生成图片还是文本：让图片出现概率更高些 (例如 70%)
+    const rand = Math.random();
+    if (rand < 0.65) {
+      spawnImagePopup(nextImage());
+    } else {
+      spawnTextPopup(nextText());
+    }
+    // 微小延迟让弹窗不完全同时出现（更好看）
+  }
+}
+
+/* ---------- 获取下一张图片名字（循环） ---------- */
+function nextImage(){
+  const name = imageFiles[imageIndex % imageFiles.length];
+  imageIndex++;
+  return name;
+}
+/* ---------- 获取下一个文字（循环） ---------- */
+function nextText(){
+  const t = textMessages[textIndex % textMessages.length];
+  textIndex++;
+  return t;
+}
+
+/* ---------- 生成图片弹窗 ---------- */
+function spawnImagePopup(imgName){
+  if (activePopups >= MAX_SIMULTANEOUS) return;
+  activePopups++;
+
+  const popup = document.createElement('div');
+  popup.className = 'popup image';
+
+  // 让图片有较小白边与圆角（CSS 已定义），插入 img 元素
+  const img = document.createElement('img');
+  img.src = imgName;
+  img.alt = '';
+  // 如果图片加载失败，隐藏并减少 activePopups
+  img.onerror = ()=> {
+    // 若图片加载失败，自动移除并减少计数
+    popup.remove();
+    activePopups = Math.max(0, activePopups-1);
+  };
+
+  popup.appendChild(img);
+
+  // 可选文字（若需，可显示说明）
+  // const p = document.createElement('p'); p.textContent = '送你小花花 🌸'; popup.appendChild(p);
+
+  // 随机位置：避免挡到固定 UI（不要完全靠近边界）
+  const pos = randomPosition(popup, 320, 240);
+  popup.style.left = pos.x + 'px';
+  popup.style.top = pos.y + 'px';
+
+  document.body.appendChild(popup);
+
+  // 自动淡出与移除（先保留显示时间，再淡出）
+  setTimeout(()=> {
+    popup.classList.add('hide');
+    setTimeout(()=> {
+      try{ popup.remove(); }catch(e){}
+      activePopups = Math.max(0, activePopups-1);
+    }, 520);
+  }, POPUP_SHOW_TIME);
+}
+
+/* ---------- 生成文字弹窗 ---------- */
+function spawnTextPopup(text){
+  if (activePopups >= MAX_SIMULTANEOUS) return;
+  activePopups++;
+
+  const popup = document.createElement('div');
+  popup.className = 'popup text';
+  popup.innerText = text;
+
+  // 随机位置（更靠近屏幕中心比图片更靠中心）
+  const pos = randomPosition(popup, 240, 140);
+  popup.style.left = pos.x + 'px';
+  popup.style.top = pos.y + 'px';
+
+  document.body.appendChild(popup);
+
+  setTimeout(()=> {
+    popup.classList.add('hide');
+    setTimeout(()=> {
+      try{ popup.remove(); }catch(e){}
+      activePopups = Math.max(0, activePopups-1);
+    }, 520);
+  }, POPUP_SHOW_TIME);
+}
+
+/* ---------- 计算随机位置（避免被导航栏或边缘挡住） ---------- */
+function randomPosition(popupEl, approxWidth=260, approxHeight=180){
+  // 取得视窗尺寸
+  const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+  const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+  // 限制区域（避免靠太边）
+  const margin = 24;
+  const minX = margin;
+  const maxX = vw - approxWidth - margin;
+  const minY = margin + 44; // 避免顶端被遮挡
+  const maxY = vh - approxHeight - margin;
+
+  const x = Math.floor(Math.random() * (Math.max(0, maxX - minX + 1))) + minX;
+  const y = Math.floor(Math.random() * (Math.max(0, maxY - minY + 1))) + minY;
+  return {x,y};
+}
+
+/* ---------- 停止/重启逻辑（如需） ---------- */
+/* 可在未来添加控制面板来启停 spawnTimer、调整速率等。 */
+
+/* ---------- 立即启动测试（可注释掉） ---------- */
+/* 如果你想在进入后马上就试一波（已由进入按钮触发），不需要额外操作 */
+</script>
 </body>
 </html>
