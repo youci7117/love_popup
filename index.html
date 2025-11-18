@@ -96,6 +96,28 @@
         from { opacity: 0; transform: translate(-50%, -60%); }
         to { opacity: 1; transform: translate(-50%, -50%); }
     }
+
+    /* --- 点击冒出小爱心 --- */
+.heart {
+    position: absolute;
+    font-size: 20px;
+    color: #ff5fa2;
+    animation: floatUp 1s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(1.4);
+    }
+}
+
+    
 </style>
 </head>
 
@@ -142,7 +164,7 @@
 </div>
 
 <!-- 背景音乐 -->
-<audio id="bgm" src="music.mp3"></audio>
+<audio id="bgm" src="hvpbo-khuht.mp3"></audio>
 
 <script>
 document.getElementById("startBtn").onclick = function () {
@@ -203,6 +225,30 @@ document.getElementById("startBtn").onclick = function () {
     setTimeout(showNextPopup, 1600);
 
 };
+
+// 点击冒出小爱心
+document.addEventListener("click", function(e) {
+
+    // 不在进入画面时才产生爱心
+    if (document.getElementById("startScreen").style.display !== "none") return;
+
+    let heart = document.createElement("div");
+    heart.className = "heart";
+    heart.innerText = "❤";
+
+    // 设置出现位置
+    heart.style.left = e.clientX + "px";
+    heart.style.top = e.clientY + "px";
+
+    document.body.appendChild(heart);
+
+    // 1 秒后删除
+    setTimeout(() => {
+        heart.remove();
+    }, 1000);
+});
+
+    
 </script>
 
 </body>
