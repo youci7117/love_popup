@@ -36,7 +36,7 @@
             text-shadow: 0 4px 10px rgba(255, 255, 255, 0.6);
         }
 
-        /* ★ 新增：名字輸入框樣式 */
+        /* 名字輸入框 */
         #nameInput {
             padding: 10px 14px;
             font-size: 18px;
@@ -88,10 +88,16 @@
             border-radius: 18px;
             padding: 15px;
             box-shadow: 0 6px 20px rgba(255, 105, 180, 0.35);
-            animation: fadeIn 0.6s ease forwards;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.8s ease;
+        }
+
+        /* ★ 新增：帶飄浮效果的彈窗 */
+        .popupBox.floatBubble {
+            /* 同時做：先淡入、再持續浮動 */
+            animation:
+                fadeIn 0.6s ease forwards,
+                floatDown var(--float-duration, 7s) ease-in-out infinite alternate;
         }
 
         /* 圖片彈窗 */
@@ -128,6 +134,16 @@
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ★ 新增：泡泡微微上下飄、帶一點水平偏移 */
+        @keyframes floatDown {
+            from {
+                transform: translateY(0px) translateX(0px);
+            }
+            to {
+                transform: translateY(30px) translateX(10px);
             }
         }
 
@@ -192,7 +208,6 @@
     <!-- 進入畫面 -->
     <div id="enterScreen">
         <h1>💕 給你的小驚喜 💕</h1>
-        <!-- ★ 新增：名字輸入框 -->
         <input id="nameInput" type="text" placeholder="要給誰的小驚喜？" />
         <button id="enterBtn">進入</button>
     </div>
@@ -245,26 +260,20 @@
         let popupRunning = false;  // 控制彈窗循環
         let clickCount = 0;        // 點擊次數
         let finalShown = false;    // 最後畫面是否已經出現
-        let targetName = "你";     // ★ 新增：目標名字，預設「你」
+        let targetName = "你";     // 目標名字，預設「你」
 
         // ░░░ 點「進入」後 ░░░
         enterBtn.onclick = function () {
             // 抓取她輸入的名字
             const v = nameInput.value.trim();
-            if (v) {
-                targetName = v;
-            } else {
-                targetName = "你";
-            }
+            targetName = v || "你";
 
             // 關閉封面
             enterScreen.style.display = "none";
 
             // 播放 BGM（漸漸變大聲）
             bgm.volume = 0;
-            bgm.play().catch(() => {
-                // 有些瀏覽器第一次要互動才能播，這裡先忽略錯誤
-            });
+            bgm.play().catch(() => {});
 
             let vol = 0;
             let fade = setInterval(() => {
@@ -308,7 +317,12 @@
                 for (let i = 0; i < count; i++) {
                     let isImage = Math.random() < 0.7; // 70% 圖片、30% 文字
                     let box = document.createElement("div");
-                    box.className = "popupBox";
+                    // ★ 加上 floatBubble，讓它有飄浮動畫
+                    box.className = "popupBox floatBubble";
+
+                    // 隨機給每個框一個飄浮時間（6~10 秒）
+                    let floatDuration = Math.random() * 4 + 6; // 6~10
+                    box.style.setProperty("--float-duration", floatDuration + "s");
 
                     // 圖片尺寸（180 ~ 260）
                     let size = Math.random() * 80 + 180;
@@ -323,7 +337,7 @@
                         let txt = document.createElement("div");
                         txt.className = "popupText";
 
-                        // ★ 在這裡帶入名字
+                        // 帶入名字
                         let raw = textList[Math.floor(Math.random() * textList.length)];
                         let msg = raw.replaceAll("{name}", targetName);
                         txt.innerText = msg;
