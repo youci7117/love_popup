@@ -32,8 +32,21 @@
         #enterScreen h1 {
             font-size: 32px;
             color: white;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             text-shadow: 0 4px 10px rgba(255, 255, 255, 0.6);
+        }
+
+        /* ★ 新增：名字輸入框樣式 */
+        #nameInput {
+            padding: 10px 14px;
+            font-size: 18px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            margin-bottom: 14px;
+            text-align: center;
+            width: 230px;
+            box-shadow: 0 3px 8px rgba(255, 105, 180, 0.45);
         }
 
         #enterBtn {
@@ -120,9 +133,9 @@
 
         /* 舊彈窗淡出壓底（堆疊感 + 漸淡） */
         .fadeOutLayer {
-            opacity: 0.4 !important;          /* 原本很淡，這裡改比較看得清楚 */
+            opacity: 0.4 !important;
             z-index: 1 !important;
-            transition: opacity 1.2s ease;    /* 慢慢淡下去 */
+            transition: opacity 1.2s ease;
         }
 
         /* 愛心往上飄 */
@@ -179,6 +192,8 @@
     <!-- 進入畫面 -->
     <div id="enterScreen">
         <h1>💕 給你的小驚喜 💕</h1>
+        <!-- ★ 新增：名字輸入框 -->
+        <input id="nameInput" type="text" placeholder="要給誰的小驚喜？" />
         <button id="enterBtn">進入</button>
     </div>
 
@@ -202,18 +217,18 @@
             "2025928211642.png","2025928231020.png","202596195817.png","202596211548.png"
         ];
 
-        // ░░░ 告白文字（可以改成你想說的） ░░░
+        // ░░░ 告白文字（用 {name} 當佔位符） ░░░
         const textList = [
-            "喜歡一個俠緣",
-            "今天也要開心！",
-            "俠緣高不高級呀！",
-            "俠緣是最厲害的！",
-            "俠緣萌萌",
-            "我親親你",
-            "我是俠緣的小狗！",
+            "今天也要開心，{name}！",
+            "{name}高不高級呀！",
+            "{name}是最厲害的！",
+            "{name}萌萌",
+            "我親親{name}",
+            "我是{name}的小狗！",
             "老公！",
-            "我喜歡你！",
-            "萌鼠了"
+            "我喜歡你，{name}！",
+            "萌鼠了",
+            "看到{name}就會笑"
         ];
 
         // ░░░ 最後一張大圖＆最後一段話 ░░░
@@ -224,14 +239,24 @@
         const enterScreen = document.getElementById("enterScreen");
         const enterBtn = document.getElementById("enterBtn");
         const bgm = document.getElementById("bgm");
+        const nameInput = document.getElementById("nameInput");
 
         let popupHistory = [];     // 記錄上一輪的彈窗
         let popupRunning = false;  // 控制彈窗循環
         let clickCount = 0;        // 點擊次數
         let finalShown = false;    // 最後畫面是否已經出現
+        let targetName = "你";     // ★ 新增：目標名字，預設「你」
 
         // ░░░ 點「進入」後 ░░░
         enterBtn.onclick = function () {
+            // 抓取她輸入的名字
+            const v = nameInput.value.trim();
+            if (v) {
+                targetName = v;
+            } else {
+                targetName = "你";
+            }
+
             // 關閉封面
             enterScreen.style.display = "none";
 
@@ -241,11 +266,11 @@
                 // 有些瀏覽器第一次要互動才能播，這裡先忽略錯誤
             });
 
-            let v = 0;
+            let vol = 0;
             let fade = setInterval(() => {
-                if (v < 0.5) {
-                    v += 0.02;
-                    bgm.volume = v;
+                if (vol < 0.5) {
+                    vol += 0.02;
+                    bgm.volume = vol;
                 } else {
                     clearInterval(fade);
                 }
@@ -297,7 +322,12 @@
                     } else {
                         let txt = document.createElement("div");
                         txt.className = "popupText";
-                        txt.innerText = textList[Math.floor(Math.random() * textList.length)];
+
+                        // ★ 在這裡帶入名字
+                        let raw = textList[Math.floor(Math.random() * textList.length)];
+                        let msg = raw.replaceAll("{name}", targetName);
+                        txt.innerText = msg;
+
                         box.appendChild(txt);
                     }
 
@@ -317,7 +347,7 @@
 
                 popupHistory = newRound;
 
-                // 下一輪：3 ~ 5 秒後（原本較快，這裡刻意放慢）
+                // 下一輪：3 ~ 5 秒後（節奏較慢）
                 let delay = Math.random() * 2000 + 3000;
                 setTimeout(launchRound, delay);
             }
