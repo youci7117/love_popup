@@ -17,7 +17,7 @@
             position: relative; /* 為了讓 ::before 心跳光暈定位 */
         }
 
-        /* ★ 新增：背景心跳光暈（在所有內容後面跳動的粉光） */
+        /* 背景心跳光暈（一般狀態） */
         body::before {
             content: "";
             position: fixed;
@@ -167,7 +167,7 @@
             }
         }
 
-        /* ★ 新增：心跳光暈脈動動畫 */
+        /* 心跳光暈脈動動畫 */
         @keyframes pulseHeart {
             0% {
                 opacity: 0.25;
@@ -189,9 +189,9 @@
 
         /* 舊彈窗淡出壓底（堆疊感 + 漸淡） */
         .fadeOutLayer {
-             opacity: 0.4 !important;
-             z-index: 1 !important;
-             transition: opacity 1.2s ease;
+            opacity: 0.4 !important;
+            z-index: 1 !important;
+            transition: opacity 1.2s ease;
         }
 
         /* 愛心往上飄 */
@@ -206,11 +206,12 @@
             }
         }
 
-        /* 最後告白畫面 */
+        /* ★★★ 最後告白畫面：星空＋流星背景 ★★★ */
         #finalScreen {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.65);
+            overflow: hidden;
+            background: radial-gradient(circle at top, #25335a 0%, #050814 55%, #000000 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -218,13 +219,83 @@
             animation: fadeIn 0.8s ease forwards;
         }
 
+        /* 星星層（緩慢流動的星光） */
+        #finalScreen::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 30% 80%, rgba(255,255,255,0.7), transparent),
+                radial-gradient(2px 2px at 70% 30%, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1.5px 1.5px at 90% 60%, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 50% 50%, rgba(255,255,255,0.6), transparent);
+            background-repeat: no-repeat;
+            opacity: 0.9;
+            animation: starDrift 30s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 流星層（不斷從畫面一角掠過的流光） */
+        #finalScreen::after {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 2px;
+            background: linear-gradient(
+                to left,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0.9),
+                rgba(255,255,255,0)
+            );
+            top: -10%;
+            left: 110%;
+            transform: rotate(-25deg);
+            opacity: 0;
+            animation: meteorShoot 4.5s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 星空星星位移動畫（慢慢滑動） */
+        @keyframes starDrift {
+            0% {
+                transform: translate3d(0, 0, 0);
+            }
+            100% {
+                transform: translate3d(-40px, 20px, 0);
+            }
+        }
+
+        /* 流星動畫：淡入→掠過→淡出 */
+        @keyframes meteorShoot {
+            0% {
+                opacity: 0;
+                transform: translate3d(0, 0, 0) rotate(-25deg);
+            }
+            10% {
+                opacity: 1;
+            }
+            40% {
+                opacity: 0.8;
+                transform: translate3d(-140%, 120%, 0) rotate(-25deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate3d(-160%, 140%, 0) rotate(-25deg);
+            }
+        }
+
         .finalBox {
-            background: white;
+            position: relative;
+            background: rgba(255, 255, 255, 0.94);
             border-radius: 20px;
             padding: 20px;
             max-width: 90vw;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
             text-align: center;
+            z-index: 2; /* 流星與星空都在背後 */
         }
 
         .finalImg {
@@ -236,9 +307,16 @@
 
         .finalText {
             font-size: 22px;
-            color: #ff4f8b;
+            color: #ffedf4;
             margin-top: 10px;
             white-space: pre-line;  /* 支援換行 \n */
+            /* 讓文字也帶一點光暈感，像被星光照著 */
+            text-shadow:
+                0 0 6px rgba(255, 105, 180, 0.6),
+                0 0 14px rgba(255, 255, 255, 0.9);
+            background: linear-gradient(120deg, #ff9acb, #ffd1f0);
+            -webkit-background-clip: text;
+            color: transparent;
         }
     </style>
 </head>
@@ -410,11 +488,14 @@
             setTimeout(launchRound, 1000);
         }
 
-        // ░░░ 顯示最後大圖＋文字（結束畫面） ░░░
+        // ░░░ 顯示最後大圖＋文字（結束畫面：星空） ░░░
         function showFinal() {
             if (finalShown) return;
             finalShown = true;
             popupRunning = false;  // 停止之後的彈窗循環
+
+            // 也可以選擇把背景心跳光暈關掉：
+            // document.body.style.setProperty("animation", "none");
 
             const overlay = document.createElement("div");
             overlay.id = "finalScreen";
