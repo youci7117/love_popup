@@ -6,6 +6,11 @@
     <title>Love Popup</title>
 
     <style>
+        :root {
+            /* ★ 心跳節奏：這裡改秒數就能調心跳速度，例如 2s、1.8s、3.2s */
+            --heart-duration: 2.4s;
+        }
+
         /* 全局設定 */
         body {
             margin: 0;
@@ -14,24 +19,24 @@
             background: #ffe6f2;
             font-family: "Comic Sans MS", "Microsoft JhengHei", sans-serif;
             user-select: none;
-            position: relative; /* 為了讓 ::before 心跳光暈定位 */
+            position: relative;
         }
 
         /* 背景心跳光暈（一般狀態） */
         body::before {
             content: "";
             position: fixed;
-            inset: -40px; /* 稍微超出畫面，避免邊緣硬線 */
+            inset: -60px;
             background:
                 radial-gradient(
                     circle at center,
-                    rgba(255, 160, 200, 0.55),
-                    rgba(255, 230, 242, 0) 60%
+                    rgba(255, 140, 190, 0.85),
+                    rgba(255, 220, 240, 0.0) 65%
                 );
-            opacity: 0.35;
+            opacity: 0.6;
             pointer-events: none;
             z-index: 0;
-            animation: pulseHeart 3s ease-in-out infinite;
+            animation: pulseHeart var(--heart-duration, 3s) ease-in-out infinite;
             transform-origin: center center;
         }
 
@@ -90,7 +95,7 @@
             height: 100vh;
             position: relative;
             overflow: hidden;
-            z-index: 1; /* 壓在心跳光暈上面 */
+            z-index: 1;
         }
 
         /* 彈窗容器 */
@@ -170,19 +175,19 @@
         /* 心跳光暈脈動動畫 */
         @keyframes pulseHeart {
             0% {
-                opacity: 0.25;
+                opacity: 0.35;
                 transform: scale(1);
             }
             35% {
-                opacity: 0.55;
-                transform: scale(1.04);
+                opacity: 0.85;
+                transform: scale(1.06);
             }
             60% {
-                opacity: 0.3;
+                opacity: 0.45;
                 transform: scale(1.01);
             }
             100% {
-                opacity: 0.25;
+                opacity: 0.35;
                 transform: scale(1);
             }
         }
@@ -206,7 +211,7 @@
             }
         }
 
-        /* ★★★ 最後告白畫面：星空＋流星背景 ★★★ */
+        /* === 最後告白畫面：星空＋流星背景 === */
         #finalScreen {
             position: fixed;
             inset: 0;
@@ -219,9 +224,8 @@
             animation: fadeIn 0.8s ease forwards;
         }
 
-        /* 星星層（緩慢流動的星光） */
-        #finalScreen::before {
-            content: "";
+        /* 星星層 */
+        .starLayer {
             position: absolute;
             inset: 0;
             background-image:
@@ -237,9 +241,8 @@
             z-index: 0;
         }
 
-        /* 流星層（不斷從畫面一角掠過的流光） */
-        #finalScreen::after {
-            content: "";
+        /* 流星層 */
+        .meteorLayer {
             position: absolute;
             width: 180px;
             height: 2px;
@@ -295,7 +298,7 @@
             max-width: 90vw;
             box-shadow: 0 8px 30px rgba(0,0,0,0.6);
             text-align: center;
-            z-index: 2; /* 流星與星空都在背後 */
+            z-index: 2;
         }
 
         .finalImg {
@@ -307,16 +310,31 @@
 
         .finalText {
             font-size: 22px;
-            color: #ffedf4;
             margin-top: 10px;
-            white-space: pre-line;  /* 支援換行 \n */
-            /* 讓文字也帶一點光暈感，像被星光照著 */
+            white-space: pre-line;
             text-shadow:
                 0 0 6px rgba(255, 105, 180, 0.6),
                 0 0 14px rgba(255, 255, 255, 0.9);
             background: linear-gradient(120deg, #ff9acb, #ffd1f0);
             -webkit-background-clip: text;
             color: transparent;
+        }
+
+        /* ★ 新增：結尾按鈕 */
+        .finalBtn {
+            margin-top: 16px;
+            padding: 8px 20px;
+            font-size: 18px;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            background: #ff9acb;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .finalBtn:hover {
+            transform: translateY(-1px);
         }
     </style>
 </head>
@@ -374,22 +392,19 @@
         const bgm = document.getElementById("bgm");
         const nameInput = document.getElementById("nameInput");
 
-        let popupHistory = [];     // 記錄上一輪的彈窗
-        let popupRunning = false;  // 控制彈窗循環
-        let clickCount = 0;        // 點擊次數
-        let finalShown = false;    // 最後畫面是否已經出現
-        let targetName = "你";     // 目標名字，預設「你」
+        let popupHistory = [];
+        let popupRunning = false;
+        let clickCount = 0;
+        let finalShown = false;
+        let targetName = "你";
 
         // ░░░ 點「進入」後 ░░░
         enterBtn.onclick = function () {
-            // 抓取她輸入的名字
             const v = nameInput.value.trim();
             targetName = v || "你";
 
-            // 關閉封面
             enterScreen.style.display = "none";
 
-            // 播放 BGM（漸漸變大聲）
             bgm.volume = 0;
             bgm.play().catch(() => {});
 
@@ -403,46 +418,40 @@
                 }
             }, 120);
 
-            // 啟動彈窗循環
             startPopupLoop();
         };
 
         // ░░░ 主循環：每一輪隨機彈出 2–4 個 ░░░
         function startPopupLoop() {
+            if (popupRunning) return;  // 避免重複啟動多個 loop
             popupRunning = true;
 
             function launchRound() {
-                if (!popupRunning) return;  // 若已經結束，就不要繼續跑
+                if (!popupRunning) return;
 
-                // 先處理舊的一輪
+                // 舊的一輪
                 const oldPopups = popupHistory;
                 oldPopups.forEach(box => {
-                    // 2 秒後才開始變淡，讓圖片有時間看清楚
                     setTimeout(() => {
                         box.classList.add("fadeOutLayer");
                     }, 2000);
-
-                    // 8 秒後移除舊彈窗，避免越堆越多
                     setTimeout(() => {
                         if (box.parentNode) box.remove();
                     }, 8000);
                 });
 
-                // 這一輪的新彈窗
+                // 新的一輪
                 let count = Math.floor(Math.random() * 3) + 2; // 2~4 個
                 let newRound = [];
 
                 for (let i = 0; i < count; i++) {
-                    let isImage = Math.random() < 0.7; // 70% 圖片、30% 文字
+                    let isImage = Math.random() < 0.7;
                     let box = document.createElement("div");
-                    // 加上 floatBubble，讓它有飄浮動畫
                     box.className = "popupBox floatBubble";
 
-                    // 隨機給每個框一個飄浮時間（6~10 秒）
-                    let floatDuration = Math.random() * 4 + 6; // 6~10
+                    let floatDuration = Math.random() * 4 + 6; // 6~10 秒
                     box.style.setProperty("--float-duration", floatDuration + "s");
 
-                    // 圖片尺寸（180 ~ 260）
                     let size = Math.random() * 80 + 180;
 
                     if (isImage) {
@@ -455,7 +464,6 @@
                         let txt = document.createElement("div");
                         txt.className = "popupText";
 
-                        // 帶入名字
                         let raw = textList[Math.floor(Math.random() * textList.length)];
                         let msg = raw.replaceAll("{name}", targetName);
                         txt.innerText = msg;
@@ -463,7 +471,6 @@
                         box.appendChild(txt);
                     }
 
-                    // 隨機位置（大概避免出界）
                     let maxX = window.innerWidth - 260;
                     let maxY = window.innerHeight - 260;
                     let x = Math.random() * maxX;
@@ -479,12 +486,10 @@
 
                 popupHistory = newRound;
 
-                // 下一輪：3 ~ 5 秒後（節奏較慢）
                 let delay = Math.random() * 2000 + 3000;
                 setTimeout(launchRound, delay);
             }
 
-            // 1 秒後開第一輪
             setTimeout(launchRound, 1000);
         }
 
@@ -492,13 +497,16 @@
         function showFinal() {
             if (finalShown) return;
             finalShown = true;
-            popupRunning = false;  // 停止之後的彈窗循環
-
-            // 也可以選擇把背景心跳光暈關掉：
-            // document.body.style.setProperty("animation", "none");
+            // 注意：不把 popupRunning 設成 false，讓彈窗在背後繼續跑
 
             const overlay = document.createElement("div");
             overlay.id = "finalScreen";
+
+            // 星空 + 流星層
+            const stars = document.createElement("div");
+            stars.className = "starLayer";
+            const meteor = document.createElement("div");
+            meteor.className = "meteorLayer";
 
             const box = document.createElement("div");
             box.className = "finalBox";
@@ -511,18 +519,31 @@
             text.className = "finalText";
             text.innerText = finalMessage;
 
+            const btn = document.createElement("button");
+            btn.className = "finalBtn";
+            btn.innerText = "我知道了";
+
+            // 按鈕：關閉結尾畫面，回到彈窗世界
+            btn.onclick = () => {
+                overlay.remove();
+                // 只關畫面，不重置 finalShown：不再出第二次結局
+            };
+
             box.appendChild(img);
             box.appendChild(text);
+            box.appendChild(btn);
+
+            overlay.appendChild(stars);
+            overlay.appendChild(meteor);
             overlay.appendChild(box);
+
             document.body.appendChild(overlay);
         }
 
         // ░░░ 點擊畫面時：愛心 + 統計點擊次數 ░░░
         document.addEventListener("click", function (e) {
-            // 封面還沒關掉時，不要出愛心 / 不計次
             if (enterScreen.style.display !== "none") return;
 
-            // 點擊計數：第五下觸發結局
             if (!finalShown) {
                 clickCount++;
                 if (clickCount >= 5) {
@@ -530,7 +551,6 @@
                 }
             }
 
-            // 冒出小愛心
             let heart = document.createElement("div");
             heart.className = "heart";
             heart.innerText = "❤";
