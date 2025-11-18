@@ -118,10 +118,11 @@
             }
         }
 
-        /* 舊彈窗淡出壓底（堆疊感） */
+        /* 舊彈窗淡出壓底（堆疊感 + 漸淡） */
         .fadeOutLayer {
-            opacity: 0.25 !important;
+            opacity: 0.4 !important;          /* 原本很淡，這裡改比較看得清楚 */
             z-index: 1 !important;
+            transition: opacity 1.2s ease;    /* 慢慢淡下去 */
         }
 
         /* 愛心往上飄 */
@@ -135,12 +136,47 @@
                 opacity: 0;
             }
         }
+
+        /* 最後告白畫面 */
+        #finalScreen {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .finalBox {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 90vw;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        .finalImg {
+            width: min(80vw, 360px);
+            border-radius: 16px;
+            display: block;
+            margin: 0 auto 15px;
+        }
+
+        .finalText {
+            font-size: 22px;
+            color: #ff4f8b;
+            margin-top: 10px;
+            white-space: pre-line;  /* 支援換行 \n */
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- 進入畫面（只保留這一個） -->
+    <!-- 進入畫面 -->
     <div id="enterScreen">
         <h1>💕 給你的小驚喜 💕</h1>
         <button id="enterBtn">進入</button>
@@ -151,7 +187,7 @@
         <div id="popupContainer"></div>
     </div>
 
-    <!-- 背景音樂（只保留一個，檔名自己改） -->
+    <!-- 背景音樂（檔名自己改） -->
     <audio id="bgm" src="hvpbo-khuht.mp3" preload="auto"></audio>
 
     <script>
@@ -166,7 +202,7 @@
             "2025928211642.png","2025928231020.png","202596195817.png","202596211548.png"
         ];
 
-        // ░░░ 你的告白文字（你要繁體就自己改） ░░░
+        // ░░░ 告白文字（可以改成你想說的） ░░░
         const textList = [
             "喜歡一個俠緣",
             "今天也要開心！",
@@ -180,12 +216,19 @@
             "萌鼠了"
         ];
 
+        // ░░░ 最後一張大圖＆最後一段話 ░░░
+        const finalImage = "final_big.png";   // 換成你的「最後大圖」檔名
+        const finalMessage = "從今天開始，\n我想要一直待在你身邊。\n\n可以把未來的一部分，分給我嗎？";
+
         const popupContainer = document.getElementById("popupContainer");
         const enterScreen = document.getElementById("enterScreen");
         const enterBtn = document.getElementById("enterBtn");
         const bgm = document.getElementById("bgm");
 
-        let popupHistory = []; // 記錄上一輪彈窗
+        let popupHistory = [];     // 記錄上一輪的彈窗
+        let popupRunning = false;  // 控制彈窗循環
+        let clickCount = 0;        // 點擊次數
+        let finalShown = false;    // 最後畫面是否已經出現
 
         // ░░░ 點「進入」後 ░░░
         enterBtn.onclick = function () {
@@ -214,13 +257,26 @@
 
         // ░░░ 主循環：每一輪隨機彈出 2–4 個 ░░░
         function startPopupLoop() {
+            popupRunning = true;
 
             function launchRound() {
-                // 先把舊彈窗變淡、壓到下面
-                popupHistory.forEach(box => {
-                    box.classList.add("fadeOutLayer");
+                if (!popupRunning) return;  // 若已經結束，就不要繼續跑
+
+                // 先處理舊的一輪
+                const oldPopups = popupHistory;
+                oldPopups.forEach(box => {
+                    // 2 秒後才開始變淡，讓圖片有時間看清楚
+                    setTimeout(() => {
+                        box.classList.add("fadeOutLayer");
+                    }, 2000);
+
+                    // 8 秒後移除舊彈窗，避免越堆越多
+                    setTimeout(() => {
+                        if (box.parentNode) box.remove();
+                    }, 8000);
                 });
 
+                // 這一輪的新彈窗
                 let count = Math.floor(Math.random() * 3) + 2; // 2~4 個
                 let newRound = [];
 
@@ -261,8 +317,8 @@
 
                 popupHistory = newRound;
 
-                // 下一輪：1.5 ~ 3 秒後
-                let delay = Math.random() * 1500 + 1500;
+                // 下一輪：3 ~ 5 秒後（原本較快，這裡刻意放慢）
+                let delay = Math.random() * 2000 + 3000;
                 setTimeout(launchRound, delay);
             }
 
@@ -270,11 +326,46 @@
             setTimeout(launchRound, 1000);
         }
 
-        // ░░░ 點擊畫面時冒出小愛心 ░░░
+        // ░░░ 顯示最後大圖＋文字（結束畫面） ░░░
+        function showFinal() {
+            if (finalShown) return;
+            finalShown = true;
+            popupRunning = false;  // 停止之後的彈窗循環
+
+            const overlay = document.createElement("div");
+            overlay.id = "finalScreen";
+
+            const box = document.createElement("div");
+            box.className = "finalBox";
+
+            const img = document.createElement("img");
+            img.src = finalImage;
+            img.className = "finalImg";
+
+            const text = document.createElement("div");
+            text.className = "finalText";
+            text.innerText = finalMessage;
+
+            box.appendChild(img);
+            box.appendChild(text);
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+        }
+
+        // ░░░ 點擊畫面時：愛心 + 統計點擊次數 ░░░
         document.addEventListener("click", function (e) {
-            // 封面還沒關掉時，不要出愛心
+            // 封面還沒關掉時，不要出愛心 / 不計次
             if (enterScreen.style.display !== "none") return;
 
+            // 點擊計數：第五下觸發結局
+            if (!finalShown) {
+                clickCount++;
+                if (clickCount >= 5) {
+                    showFinal();
+                }
+            }
+
+            // 冒出小愛心
             let heart = document.createElement("div");
             heart.className = "heart";
             heart.innerText = "❤";
