@@ -42,9 +42,7 @@
         box-shadow: 0px 4px 10px rgba(255, 105, 180, 0.5);
         transition: 0.3s;
     }
-    #startBtn:hover {
-        transform: scale(1.05);
-    }
+    #startBtn:hover { transform: scale(1.05); }
 
     /* --- 主内容区 --- */
     #mainContent {
@@ -52,7 +50,7 @@
         transition: opacity 1.2s ease;
     }
 
-    /* --- 小句子弹窗（自动跳出） --- */
+    /* --- 小句子弹窗 --- */
     #miniPopup {
         position: fixed;
         bottom: 30px;
@@ -72,24 +70,24 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* --- 主弹窗 --- */
-    #lovePopup {
+    /* --- 主弹窗固定样式 --- */
+    .popupBox {
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: white;
-        padding: 30px;
         width: 280px;
+        padding: 25px;
+        background: white;
         border-radius: 20px;
         text-align: center;
-        box-shadow: 0 5px 25px rgba(255, 105, 180, 0.4);
         display: none;
         z-index: 999;
+        box-shadow: 0 5px 25px rgba(255, 105, 180, 0.35);
         animation: fadeIn 0.8s;
     }
 
-    #lovePopup img {
+    .popupBox img {
         width: 150px;
         margin-bottom: 15px;
     }
@@ -97,16 +95,6 @@
     @keyframes fadeIn {
         from { opacity: 0; transform: translate(-50%, -60%); }
         to { opacity: 1; transform: translate(-50%, -50%); }
-    }
-
-    #lovePopup button {
-        margin-top: 15px;
-        padding: 10px 20px;
-        background: #ff88bb;
-        color: white;
-        border: none;
-        border-radius: 20px;
-        cursor: pointer;
     }
 </style>
 </head>
@@ -123,16 +111,24 @@
 <div id="mainContent">
 
     <!-- 小句子弹窗 -->
-    <div id="miniPopup">
-        💬 想偷偷告诉你一件事...
-    </div>
+    <div id="miniPopup">💬 想偷偷告诉你一件事...</div>
 
-    <!-- 主恋爱弹窗（含图片） -->
-    <div id="lovePopup">
-        <img src="20251015181155.png" alt="">
+    <!-- 主告白弹窗 -->
+    <div id="popup1" class="popupBox">
+        <img src="2025102419201.png" alt="">
         <h2>我想跟你说：</h2>
         <p>你是我每天最最最期待的人 💗</p>
-        <button onclick="closeLovePopup()">好啦~</button>
+    </div>
+
+    <!-- D 模式：文字弹窗 -->
+    <div id="popup2" class="popupBox">
+        <p>其实啊，每次看到你我都会超级开心 ✨</p>
+    </div>
+
+    <!-- E 模式：图片弹窗 -->
+    <div id="popup3" class="popupBox">
+        <img src="20251015181155.png">
+        <p>送你小花花 🌸</p>
     </div>
 
 </div>
@@ -141,19 +137,17 @@
 <audio id="bgm" src="music.mp3"></audio>
 
 <script>
-// 点击进入按钮
 document.getElementById("startBtn").onclick = function () {
 
-    // 隐藏进入画面
+    // 关闭进入画面
     document.getElementById("startScreen").style.display = "none";
 
-    // 主内容淡入
+    // 主画面淡入
     document.getElementById("mainContent").style.opacity = 1;
 
-    // 背景音乐淡入播放
+    // 背景音乐淡入
     let bgm = document.getElementById("bgm");
     let volume = 0;
-
     bgm.volume = 0;
     bgm.play();
 
@@ -166,20 +160,41 @@ document.getElementById("startBtn").onclick = function () {
         }
     }, 150);
 
-    // 小句子弹窗（先出现）
+    // 小句子弹窗最先出现
     setTimeout(() => {
         document.getElementById("miniPopup").style.display = "block";
     }, 600);
 
-    // 主弹窗（再出现）
+    // 让 miniPopup 自动消失
     setTimeout(() => {
-        document.getElementById("lovePopup").style.display = "block";
-    }, 1500);
-};
+        document.getElementById("miniPopup").style.display = "none";
+    }, 2000);
 
-function closeLovePopup() {
-    document.getElementById("lovePopup").style.display = "none";
-}
+    // 🚀 弹窗轮播系统
+    let popups = ["popup1", "popup2", "popup3"];  
+    let index = 0;
+
+    function showNextPopup() {
+        if (index >= popups.length) return;
+
+        let id = popups[index];
+        let popup = document.getElementById(id);
+
+        // 显示
+        popup.style.display = "block";
+
+        // 2.5 秒后自动关闭
+        setTimeout(() => {
+            popup.style.display = "none";
+            index++;
+            showNextPopup();  // 继续播放下一个
+        }, 2500);
+    }
+
+    // 主弹窗轮播在 1.6 秒后开始
+    setTimeout(showNextPopup, 1600);
+
+};
 </script>
 
 </body>
