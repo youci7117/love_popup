@@ -1,317 +1,291 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Love Popup</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Love Popup</title>
 
-<!-- 进入画面与全局背景样式 -->
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background: #ffeef4;
-        font-family: "Microsoft YaHei", sans-serif;
-        user-select: none;
-    }
+    <style>
+        /* 全局設定 */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #ffe6f2;
+            font-family: "Comic Sans MS", "Microsoft JhengHei", sans-serif;
+            user-select: none;
+        }
 
-    /* 进入画面 */
-    #enterScreen {
-        position: fixed;
-        inset: 0;
-        background: linear-gradient(135deg, #ff9acb, #ffb7dd);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        z-index: 9999;
-        animation: fadeIn 1.2s ease forwards;
-    }
+        /* 進入畫面 */
+        #enterScreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #ff9acb, #ffb7dd);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 2000;
+            animation: fadeIn 1s ease forwards;
+        }
 
-    #enterScreen h1 {
-        color: white;
-        font-size: 2.4rem;
-        margin-bottom: 20px;
-        text-shadow: 0 4px 10px rgba(255, 255, 255, 0.6);
-    }
+        #enterScreen h1 {
+            font-size: 32px;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 10px rgba(255, 255, 255, 0.6);
+        }
 
-    #enterBtn {
-        padding: 12px 28px;
-        font-size: 1.2rem;
-        border: none;
-        background: white;
-        border-radius: 18px;
-        cursor: pointer;
-        transition: 0.3s;
-        box-shadow: 0 4px 10px rgba(255, 255, 255, 0.5);
-    }
+        #enterBtn {
+            padding: 12px 30px;
+            font-size: 20px;
+            background: white;
+            color: #ff5fa2;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.5);
+            transition: 0.3s;
+        }
 
-    #enterBtn:hover {
-        transform: scale(1.05);
-    }
+        #enterBtn:hover {
+            transform: scale(1.05);
+        }
 
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
+        /* 主區域容器 */
+        #mainArea {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
 
-    @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-    }
-</style>
+        /* 彈窗容器 */
+        #popupContainer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        /* 彈窗基礎樣式 */
+        .popupBox {
+            position: absolute;
+            background: white;
+            border-radius: 18px;
+            padding: 15px;
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.35);
+            animation: fadeIn 0.6s ease forwards;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        /* 圖片彈窗 */
+        .popupImg {
+            width: 240px;
+            border-radius: 12px;
+            display: block;
+        }
+
+        /* 文字彈窗 */
+        .popupText {
+            font-size: 20px;
+            color: #ff4f8b;
+            padding: 5px;
+            max-width: 260px;
+            text-align: center;
+        }
+
+        /* 小愛心 */
+        .heart {
+            position: fixed;
+            font-size: 24px;
+            color: #ff4f8b;
+            pointer-events: none;
+            animation: heartFloat 0.9s ease-out forwards;
+        }
+
+        /* 淡入效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 舊彈窗淡出壓底（堆疊感） */
+        .fadeOutLayer {
+            opacity: 0.25 !important;
+            z-index: 1 !important;
+        }
+
+        /* 愛心往上飄 */
+        @keyframes heartFloat {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-60px);
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- 进入画面 -->
-<div id="enterScreen">
-    <h1>💕 给你的小惊喜 💕</h1>
-    <button id="enterBtn">进入</button>
-</div>
-
-<!-- 主区域容器 -->
-<div id="mainArea" style="width:100vw;height:100vh;position:relative;overflow:hidden;">
-
-    <!-- 弹窗容器（随机弹窗都会出现在这里） -->
-    <div id="popupContainer"
-         style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+    <!-- 進入畫面（只保留這一個） -->
+    <div id="enterScreen">
+        <h1>💕 給你的小驚喜 💕</h1>
+        <button id="enterBtn">進入</button>
     </div>
-</div>
 
-<!-- 背景音乐 -->
-<audio id="bgm" src="music.mp3"></audio>
+    <!-- 主區域 -->
+    <div id="mainArea">
+        <div id="popupContainer"></div>
+    </div>
 
-  <style>
-    body {
-        margin: 0;
-        background: #ffe6f2;
-        font-family: "Comic Sans MS", "Microsoft JhengHei", sans-serif;
-        overflow: hidden;
-    }
+    <!-- 背景音樂（只保留一個，檔名自己改） -->
+    <audio id="bgm" src="hvpbo-khuht.mp3" preload="auto"></audio>
 
-    /* 进入画面 */
-    #enterScreen {
-        position: fixed;
-        inset: 0;
-        background: linear-gradient(135deg, #ffb6c1, #ffcbe6);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        z-index: 2000;
-    }
+    <script>
+        // ░░░ 你的 28 張圖片（依你的檔名修改） ░░░
+        const imageList = [
+            "20251015181155.png","2025102419201.png","202510319582.png","2025105231052.png",
+            "202511115542.png","2025111216234.png","2025111323412.png","2025712223424.png",
+            "2025712225433.png","2025712225934.png","2025716145.png","202573014642.png",
+            "202574123.png","20257513233.png","2025770216.png","20258103110.png",
+            "202581123535.png","202581811226.png","202581812236.png","20258181841.png",
+            "20258280282.png","2025891106.png","2025891567.png","202591303746.png",
+            "2025928211642.png","2025928231020.png","202596195817.png","202596211548.png"
+        ];
 
-    #enterScreen h1 {
-        font-size: 32px;
-        color: white;
-        margin-bottom: 20px;
-    }
+        // ░░░ 你的告白文字（你要繁體就自己改） ░░░
+        const textList = [
+            "喜歡一個俠緣",
+            "今天也要開心！",
+            "俠緣高不高級呀！",
+            "俠緣是最厲害的！",
+            "俠緣萌萌",
+            "我親親你",
+            "我是俠緣的小狗！",
+            "老公！",
+            "我喜歡你！",
+            "萌鼠了"
+        ];
 
-    #enterBtn {
-        padding: 12px 30px;
-        font-size: 20px;
-        background: white;
-        color: #ff5fa2;
-        border: none;
-        border-radius: 30px;
-        cursor: pointer;
-        box-shadow: 0px 4px 10px rgba(255, 105, 180, 0.5);
-        transition: 0.3s;
-    }
+        const popupContainer = document.getElementById("popupContainer");
+        const enterScreen = document.getElementById("enterScreen");
+        const enterBtn = document.getElementById("enterBtn");
+        const bgm = document.getElementById("bgm");
 
-    #enterBtn:hover {
-        transform: scale(1.05);
-    }
+        let popupHistory = []; // 記錄上一輪彈窗
 
-    /* 弹窗基础样式 */
-    .popupBox {
-        position: absolute;
-        background: white;
-        border-radius: 18px;
-        padding: 15px;
-        box-shadow: 0 6px 20px rgba(255, 105, 180, 0.35);
-        animation: fadeIn 0.6s ease forwards;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.8s ease;
-    }
+        // ░░░ 點「進入」後 ░░░
+        enterBtn.onclick = function () {
+            // 關閉封面
+            enterScreen.style.display = "none";
 
-    /* 图片弹窗 */
-    .popupImg {
-        width: 240px;
-        border-radius: 12px;
-        display: block;
-    }
+            // 播放 BGM（漸漸變大聲）
+            bgm.volume = 0;
+            bgm.play().catch(() => {
+                // 有些瀏覽器第一次要互動才能播，這裡先忽略錯誤
+            });
 
-    /* 文字弹窗 */
-    .popupText {
-        font-size: 20px;
-        color: #ff4f8b;
-        padding: 5px;
-        max-width: 260px;
-        text-align: center;
-    }
+            let v = 0;
+            let fade = setInterval(() => {
+                if (v < 0.5) {
+                    v += 0.02;
+                    bgm.volume = v;
+                } else {
+                    clearInterval(fade);
+                }
+            }, 120);
 
-    /* 淡入效果 */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
+            // 啟動彈窗循環
+            startPopupLoop();
+        };
 
-    /* 淡出并压到下面（堆叠感） */
-    .fadeOutLayer {
-        opacity: 0.25 !important;
-        z-index: 1 !important;
-    }
-</style>
+        // ░░░ 主循環：每一輪隨機彈出 2–4 個 ░░░
+        function startPopupLoop() {
 
-  <script>
+            function launchRound() {
+                // 先把舊彈窗變淡、壓到下面
+                popupHistory.forEach(box => {
+                    box.classList.add("fadeOutLayer");
+                });
 
-// ░░░ 进入画面 ░░░
-document.getElementById("enterBtn").onclick = function () {
+                let count = Math.floor(Math.random() * 3) + 2; // 2~4 個
+                let newRound = [];
 
-    document.getElementById("enterScreen").style.display = "none";
+                for (let i = 0; i < count; i++) {
+                    let isImage = Math.random() < 0.7; // 70% 圖片、30% 文字
+                    let box = document.createElement("div");
+                    box.className = "popupBox";
 
-    let bgm = document.getElementById("bgm");
-    bgm.volume = 0;
-    bgm.play();
+                    // 圖片尺寸（180 ~ 260）
+                    let size = Math.random() * 80 + 180;
 
-    let v = 0;
-    let fade = setInterval(() => {
-        if (v < 0.5) {
-            v += 0.02;
-            bgm.volume = v;
-        } else {
-            clearInterval(fade);
-        }
-    }, 120);
+                    if (isImage) {
+                        let img = document.createElement("img");
+                        img.src = imageList[Math.floor(Math.random() * imageList.length)];
+                        img.className = "popupImg";
+                        img.style.width = size + "px";
+                        box.appendChild(img);
+                    } else {
+                        let txt = document.createElement("div");
+                        txt.className = "popupText";
+                        txt.innerText = textList[Math.floor(Math.random() * textList.length)];
+                        box.appendChild(txt);
+                    }
 
-    startPopupLoop();
-};
+                    // 隨機位置（大概避免出界）
+                    let maxX = window.innerWidth - 260;
+                    let maxY = window.innerHeight - 260;
+                    let x = Math.random() * maxX;
+                    let y = Math.random() * maxY;
 
+                    box.style.left = x + "px";
+                    box.style.top = y + "px";
+                    box.style.zIndex = 1500;
 
-// ░░░ 你的 28 张图片（按你的文件名填好） ░░░
-const imageList = [
-    "20251015181155.png","2025102419201.png","202510319582.png","2025105231052.png",
-    "202511115542.png","2025111216234.png","2025111323412.png","2025712223424.png",
-    "2025712225433.png","2025712225934.png","2025716145.png","202573014642.png",
-    "202574123.png","20257513233.png","2025770216.png","20258103110.png",
-    "202581123535.png","202581811226.png","202581812236.png","20258181841.png",
-    "20258280282.png","2025891106.png","2025891567.png","202591303746.png",
-    "2025928211642.png","2025928231020.png","202596195817.png","202596211548.png"
-];
+                    popupContainer.appendChild(box);
+                    newRound.push(box);
+                }
 
+                popupHistory = newRound;
 
-// ░░░ 你的 10 句文字（已转简体） ░░░
-const textList = [
-    "喜欢一个侠缘","今天也要开心！","侠缘高不高级呀！","侠缘是最厉害的！",
-    "侠缘萌萌","我亲亲你","我是侠缘的小狗！","老公！",
-    "我喜欢你！","萌鼠了"
-];
-
-
-// 已产生的所有弹窗（用于做淡出压底效果）
-let popupHistory = [];
-
-
-// ░░░ 主循环：随机一轮出现 2–4 个弹窗 ░░░
-function startPopupLoop() {
-
-    function launchRound() {
-
-        // 旧弹窗淡出并压底
-        popupHistory.forEach(box => {
-            box.classList.add("fadeOutLayer");
-        });
-
-        let count = Math.floor(Math.random() * 3) + 2; // 2~4 个
-        let newRound = [];
-
-        for (let i = 0; i < count; i++) {
-
-            let isImage = Math.random() < 0.7; // 70% 图片，30% 文字
-            let box = document.createElement("div");
-            box.className = "popupBox";
-
-            // 随机大小（图片用）
-            let size = Math.random() * 80 + 180; // 180~260
-
-            if (isImage) {
-                let img = document.createElement("img");
-                img.src = imageList[Math.floor(Math.random() * imageList.length)];
-                img.className = "popupImg";
-                img.style.width = size + "px";
-                box.appendChild(img);
-            } else {
-                let txt = document.createElement("div");
-                txt.className = "popupText";
-                txt.innerText = textList[Math.floor(Math.random() * textList.length)];
-                box.appendChild(txt);
+                // 下一輪：1.5 ~ 3 秒後
+                let delay = Math.random() * 1500 + 1500;
+                setTimeout(launchRound, delay);
             }
 
-            // 随机位置
-            let x = Math.random() * (window.innerWidth - 300);
-            let y = Math.random() * (window.innerHeight - 300);
-
-            box.style.left = x + "px";
-            box.style.top = y + "px";
-
-            // 最高层
-            box.style.zIndex = 1500;
-
-            document.body.appendChild(box);
-            newRound.push(box);
+            // 1 秒後開第一輪
+            setTimeout(launchRound, 1000);
         }
 
-        // 把这一轮的弹窗保存
-        popupHistory = newRound;
+        // ░░░ 點擊畫面時冒出小愛心 ░░░
+        document.addEventListener("click", function (e) {
+            // 封面還沒關掉時，不要出愛心
+            if (enterScreen.style.display !== "none") return;
 
-        // 下一轮（随机 1.5 ~ 3 秒）
-        let delay = Math.random() * 1500 + 1500;
-        setTimeout(launchRound, delay);
-    }
+            let heart = document.createElement("div");
+            heart.className = "heart";
+            heart.innerText = "❤";
 
-    // 1 秒后开始第一轮
-    setTimeout(launchRound, 1000);
-}
+            heart.style.left = e.clientX + "px";
+            heart.style.top = e.clientY + "px";
 
+            document.body.appendChild(heart);
 
-
-// ░░░ 点击冒出小爱心 ░░░
-document.addEventListener("click", function (e) {
-
-    if (document.getElementById("enterScreen").style.display !== "none") return;
-
-    let heart = document.createElement("div");
-    heart.className = "heart";
-    heart.innerText = "❤";
-
-    heart.style.left = e.clientX + "px";
-    heart.style.top = e.clientY + "px";
-
-    document.body.appendChild(heart);
-
-    setTimeout(() => heart.remove(), 900);
-});
-
-</script>
-<!-- 进入画面 -->
-<div id="enterScreen">
-    <div class="enterBox">
-        <h1 class="enterTitle">💕 给你的小惊喜 💕</h1>
-        <button id="enterBtn" class="enterBtn">进入</button>
-    </div>
-</div>
-
-<!-- 背景音乐 -->
-<audio id="bgm" src="hvpbo-khuht.mp3" preload="auto"></audio>
-
-
+            setTimeout(() => heart.remove(), 900);
+        });
+    </script>
+</body>
+</html>
