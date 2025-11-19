@@ -298,25 +298,6 @@
     z-index: 1;
 }
 
-/* 流星动画：从右上往左下掠过，角度统一，用位置来随机 */
-@keyframes meteorShoot {
-    0% {
-        opacity: 0;
-        transform: translate3d(0, 0, 0) rotate(-22deg);
-    }
-    10% {
-        opacity: 1;
-    }
-    60% {
-        opacity: 1;
-        transform: translate3d(-140%, 160%, 0) rotate(-22deg);
-    }
-    100% {
-        opacity: 0;
-        transform: translate3d(-170%, 190%, 0) rotate(-22deg);
-    }
-}
-
         /* 星空星星位移动画（慢慢滑动） */
         @keyframes starDrift {
             0% {
@@ -612,6 +593,15 @@
                 }
 
                 textHistory = [...textHistory, ...newTextRound];
+
+                // 限制最多保留 40 个文字框
+                if (textHistory.length > 40) {
+                    const removeCount = textHistory.length - 40;
+                    const toRemove = textHistory.splice(0, removeCount);
+                    toRemove.forEach(box => {
+                        if (box.parentNode) box.remove();
+                    });
+                }
 
                 const delay = Math.random() * 800 + 1200; // 1.2~2 秒
                 setTimeout(textRound, delay);
