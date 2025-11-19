@@ -380,7 +380,7 @@
 
     <!-- 进入画面 -->
     <div id="enterScreen">
-        <h1>💕 给你的小惊喜 💕</h1>
+        <h1>  看完不许哭了 ! </h1>
         <input id="nameInput" type="text" placeholder="你的名字？" />
         <button id="enterBtn">进入</button>
     </div>
@@ -388,7 +388,7 @@
     <!-- 开场文字画面（按进入后出现） -->
     <div id="introScreen">
         <div id="introBox">
-            <div id="introTitle">我跟你說!</div>
+            <div id="introTitle">我跟你說 ! </div>
             <div id="introText"></div>
         </div>
     </div>
@@ -421,12 +421,14 @@
             "{name}是最厉害的！",
             "{name}萌萌",
             "侠缘是最萌的!",
+            "侠缘好米!",
+            "侠缘好帅!",
             "我亲亲你",
             "亲亲",
             "亲亲{name}",
             "我是{name}的小狗！",
             "老公！",
-            "我喜欢{name}！",
+            "喜欢{name}！",
             "我喜欢你！",
             "喜欢一个{name}！",
             "萌鼠了",
@@ -435,6 +437,7 @@
             "我要永远黏着你!",
             "我想你了!",
             "每天都在想侠缘!",
+            "我想跟你好！",
             "喜欢侠缘笑!"
         ];
 
@@ -564,7 +567,7 @@
                     box.classList.add("fadeOutLayer");
                 });
 
-                const count = Math.floor(Math.random() * 3) + 4; // 3~4 个文字弹窗
+                const count = Math.floor(Math.random() * 2) + 5; // 2~5 个文字弹窗
                 const newTextRound = [];
 
                 for (let i = 0; i < count; i++) {
@@ -606,7 +609,7 @@
                     });
                 }
 
-                const delay = Math.random() * 800 + 1200; // 1.2~2 秒
+                const delay = Math.random() * 600 + 800; // 0.8~1.4 秒
                 setTimeout(textRound, delay);
             }
 
