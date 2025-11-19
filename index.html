@@ -564,7 +564,7 @@
                     box.classList.add("fadeOutLayer");
                 });
 
-                const count = Math.floor(Math.random() * 2) + 1; // 1~2 个文字弹窗
+                const count = Math.floor(Math.random() * 3) + 4; // 3~4 个文字弹窗
                 const newTextRound = [];
 
                 for (let i = 0; i < count; i++) {
@@ -582,8 +582,8 @@
                     txt.innerText = msg;
                     box.appendChild(txt);
 
-                    const maxX = window.innerWidth - 260;
-                    const maxY = window.innerHeight - 260;
+                    const maxX = window.innerWidth - 220;
+                    const maxY = window.innerHeight - 220;
                     const x = Math.random() * maxX;
                     const y = Math.random() * maxY;
 
