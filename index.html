@@ -284,23 +284,38 @@
 
         /* 流星层 */
         .meteorLayer {
-            position: absolute;
-            width: 260px;
-            height: 3px;
-            background: linear-gradient(
-                to left,
-                rgba(255,255,255,0),
-                rgba(255,255,255,1),
-                rgba(255,255,255,0)
-            );
-            top: 8%;
-            left: 105%;
-            transform: rotate(-22deg);
-            opacity: 0;
-            animation: meteorShoot 3.5s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 1;
-        }
+    position: absolute;
+    width: 240px;
+    height: 3px;
+    background: linear-gradient(
+        to left,
+        rgba(255,255,255,0),
+        rgba(255,255,255,1),
+        rgba(255,255,255,0)
+    );
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 流星动画：从右上往左下掠过，角度统一，用位置来随机 */
+@keyframes meteorShoot {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) rotate(-22deg);
+    }
+    10% {
+        opacity: 1;
+    }
+    60% {
+        opacity: 1;
+        transform: translate3d(-140%, 160%, 0) rotate(-22deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(-170%, 190%, 0) rotate(-22deg);
+    }
+}
 
         /* 星空星星位移动画（慢慢滑动） */
         @keyframes starDrift {
@@ -695,47 +710,79 @@
         };
 
         // ░░░ 显示最后大图＋文字（星空结束画面） ░░░
-        function showFinal() {
-            if (finalShown) return;
-            finalShown = true;
+      function showFinal() {
+    if (finalShown) return;
+    finalShown = true;
 
-            const overlay = document.createElement("div");
-            overlay.id = "finalScreen";
+    const overlay = document.createElement("div");
+    overlay.id = "finalScreen";
 
-            const stars = document.createElement("div");
-            stars.className = "starLayer";
-            const meteor = document.createElement("div");
-            meteor.className = "meteorLayer";
+    // 星空层
+    const stars = document.createElement("div");
+    stars.className = "starLayer";
 
-            const box = document.createElement("div");
-            box.className = "finalBox";
+    // 告白框
+    const box = document.createElement("div");
+    box.className = "finalBox";
 
-            const img = document.createElement("img");
-            img.src = finalImage;
-            img.className = "finalImg";
+    const img = document.createElement("img");
+    img.src = finalImage;
+    img.className = "finalImg";
 
-            const text = document.createElement("div");
-            text.className = "finalText";
-            text.innerText = finalMessage;
+    const text = document.createElement("div");
+    text.className = "finalText";
+    text.innerText = finalMessage;
 
-            const btn = document.createElement("button");
-            btn.className = "finalBtn";
-            btn.innerText = "我也喜欢侠缘";
+    const btn = document.createElement("button");
+    btn.className = "finalBtn";
+    btn.innerText = "我也喜欢侠缘";
+    btn.onclick = () => {
+        overlay.remove();
+    };
 
-            btn.onclick = () => {
-                overlay.remove();
-            };
+    box.appendChild(img);
+    box.appendChild(text);
+    box.appendChild(btn);
 
-            box.appendChild(img);
-            box.appendChild(text);
-            box.appendChild(btn);
+    overlay.appendChild(stars);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
 
-            overlay.appendChild(stars);
-            overlay.appendChild(meteor);
-            overlay.appendChild(box);
+    // ★ 在结尾画面里循环生成流星
+    function spawnMeteor() {
+        // 如果结尾画面已经被关掉，就不要再生新的流星
+        if (!document.body.contains(overlay)) return;
 
-            document.body.appendChild(overlay);
-        }
+        const meteor = document.createElement("div");
+        meteor.className = "meteorLayer";
+
+        // 随机起点（屏幕右上方某一带）
+        const startTop = Math.random() * 25;     // 0% ~ 25% 高度
+        const startLeft = 90 + Math.random() * 15; // 90% ~ 105% 宽度
+
+        meteor.style.top = startTop + "%";
+        meteor.style.left = startLeft + "%";
+
+        // 随机时长，速度有快有慢
+        const duration = 2.5 + Math.random() * 1.5; // 2.5s ~ 4.0s
+        meteor.style.animation = `meteorShoot ${duration}s ease-in-out forwards`;
+
+        overlay.appendChild(meteor);
+
+        // 动画结束后移除这颗流星
+        setTimeout(() => {
+            meteor.remove();
+        }, duration * 1000 + 200);
+
+        // 下一颗流星的间隔（1.5s ~ 4s）
+        const nextDelay = 1500 + Math.random() * 2500;
+        setTimeout(spawnMeteor, nextDelay);
+    }
+
+    // 先放出第一颗流星
+    setTimeout(spawnMeteor, 800);
+}
+
 
         // ░░░ 点击画面：爱心 + 统计点击次数 ░░░
         document.addEventListener("click", function (e) {
