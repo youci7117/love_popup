@@ -391,7 +391,7 @@
     <!-- ★ 新增：開場文字畫面（按進入後出現） -->
     <div id="introScreen">
         <div id="introBox">
-            <div id="introTitle">偷偷跟你說一件小事</div>
+            <div id="introTitle">我跟你说！</div>
             <div id="introText"></div>
         </div>
     </div>
@@ -419,28 +419,31 @@
         // ░░░ 告白文字（用 {name} 當佔位符） ░░░
         const textList = [
             "今天也要開心，{name}！",
-            "{name}高不高級呀！",
-            "{name}是最厲害的！",
-            "{name}萌萌",
-            "我親親{name}",
+            "侠缘高不高級！",
+            "{name}是最厉害的！",
+            "{name}是最萌的",
+            "我亲亲你{name}",
             "我是{name}的小狗！",
             "老公！",
-            "我喜歡你，{name}！",
+            "我喜歡一个{name}！",
             "萌鼠了",
-            "看到{name}就會笑"
+            "侠缘好萌",
+            "亲亲{name}",
+            "黏在侠缘身上！",
+            "看到{name}就很开心！"
         ];
 
         // ░░░ 最後一張大圖＆最後一段話 ░░░
         const finalImage = "2025111323822.png";   // 換成你的「最後大圖」檔名
-        const finalMessage = "我喜歡一個俠緣!\n我要永遠纏著你!";
+        const finalMessage = "我喜欢一个侠缘!\n我要永远缠着你!";
 
         // ░░░ 開場打字動畫要顯示的文字（{name} 會被換掉） ░░░
         const introLinesRaw = [
-            "其實有一件事，",
-            "我想跟你說很久了……",
-            "我覺得你是很特別的{name}。",
-            "所以，我把一些回憶做成了這個小東西，",
-            "接下來的畫面，就只屬於你。"
+            "之前老是刷到这个小程序",
+            "别人有的我老公也要有！",
+            "因为我喜欢{name}！",
+            "所以，我偷偷摸摸的做了一个升级版！",
+            "小提示:等等可以点击画面四下"
         ];
 
         const popupContainer = document.getElementById("popupContainer");
