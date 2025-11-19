@@ -8,7 +8,7 @@
     <style>
         :root {
             /* ★ 心跳節奏：這裡改秒數就能調心跳速度，例如 2s、1.8s、3.2s */
-            --heart-duration: 2.4s;
+            --heart-duration: 2.07s;
         }
 
         /* 全局設定 */
@@ -256,7 +256,7 @@
             left: 110%;
             transform: rotate(-25deg);
             opacity: 0;
-            animation: meteorShoot 4.5s ease-in-out infinite;
+            animation: meteorShoot 2.5s ease-in-out infinite;
             pointer-events: none;
             z-index: 1;
         }
@@ -344,7 +344,7 @@
     <!-- 進入畫面 -->
     <div id="enterScreen">
         <h1>💕 給你的小驚喜 💕</h1>
-        <input id="nameInput" type="text" placeholder="要給誰的小驚喜？" />
+        <input id="nameInput" type="text" placeholder="你的名字？" />
         <button id="enterBtn">進入</button>
     </div>
 
@@ -383,8 +383,8 @@
         ];
 
         // ░░░ 最後一張大圖＆最後一段話 ░░░
-        const finalImage = "final_big.png";   // 換成你的「最後大圖」檔名
-        const finalMessage = "從今天開始，\n我想要一直待在你身邊。\n\n可以把未來的一部分，分給我嗎？";
+        const finalImage = "2025111323822.png";   // 換成你的「最後大圖」檔名
+        const finalMessage = "從今天開始，\n我喜歡一個俠緣!\n\n我要永遠纏著你!";
 
         const popupContainer = document.getElementById("popupContainer");
         const enterScreen = document.getElementById("enterScreen");
