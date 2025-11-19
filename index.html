@@ -89,6 +89,46 @@
             transform: scale(1.05);
         }
 
+        /* ★ 新增：開場文字畫面 introScreen */
+        #introScreen {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 230, 242, 0.88);
+            display: none; /* 一開始隱藏，按進入才顯示 */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1800;
+            backdrop-filter: blur(2px);
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        #introBox {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 24px 26px;
+            max-width: 85vw;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        }
+
+        #introTitle {
+            font-size: 20px;
+            color: #ff4f8b;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        #introText {
+            font-size: 22px;
+            color: #ff4f8b;
+            line-height: 1.6;
+            min-height: 120px;
+        }
+
+        .introLine {
+            margin: 6px 0;
+        }
+
         /* 主區域容器 */
         #mainArea {
             width: 100vw;
@@ -320,7 +360,7 @@
             color: transparent;
         }
 
-        /* ★ 新增：結尾按鈕 */
+        /* ★ 結尾按鈕 */
         .finalBtn {
             margin-top: 16px;
             padding: 8px 20px;
@@ -346,6 +386,14 @@
         <h1>💕 給你的小驚喜 💕</h1>
         <input id="nameInput" type="text" placeholder="你的名字？" />
         <button id="enterBtn">進入</button>
+    </div>
+
+    <!-- ★ 新增：開場文字畫面（按進入後出現） -->
+    <div id="introScreen">
+        <div id="introBox">
+            <div id="introTitle">偷偷跟你說一件小事</div>
+            <div id="introText"></div>
+        </div>
     </div>
 
     <!-- 主區域 -->
@@ -386,11 +434,22 @@
         const finalImage = "2025111323822.png";   // 換成你的「最後大圖」檔名
         const finalMessage = "我喜歡一個俠緣!\n我要永遠纏著你!";
 
+        // ░░░ 開場打字動畫要顯示的文字（{name} 會被換掉） ░░░
+        const introLinesRaw = [
+            "其實有一件事，",
+            "我想跟你說很久了……",
+            "我覺得你是很特別的{name}。",
+            "所以，我把一些回憶做成了這個小東西，",
+            "接下來的畫面，就只屬於你。"
+        ];
+
         const popupContainer = document.getElementById("popupContainer");
         const enterScreen = document.getElementById("enterScreen");
         const enterBtn = document.getElementById("enterBtn");
         const bgm = document.getElementById("bgm");
         const nameInput = document.getElementById("nameInput");
+        const introScreen = document.getElementById("introScreen");
+        const introText = document.getElementById("introText");
 
         let popupHistory = [];
         let popupRunning = false;
@@ -398,13 +457,109 @@
         let finalShown = false;
         let targetName = "你";
 
+        // 開場動畫／預載狀態旗標
+        let imagesLoaded = false;
+        let introDone = false;
+
+        // ░░░ 預載圖片（28 張 + 最後大圖） ░░░
+        function preloadImages() {
+            const allImages = [...imageList, finalImage];
+            let loaded = 0;
+            const total = allImages.length;
+
+            if (total === 0) {
+                imagesLoaded = true;
+                maybeStartMain();
+                return;
+            }
+
+            allImages.forEach(src => {
+                const img = new Image();
+                img.onload = img.onerror = function () {
+                    loaded++;
+                    if (loaded >= total) {
+                        imagesLoaded = true;
+                        maybeStartMain();
+                    }
+                };
+                img.src = src;
+            });
+
+            // 安全機制：最多等 10 秒，避免極端網路掛死在開場
+            setTimeout(() => {
+                if (!imagesLoaded) {
+                    imagesLoaded = true;
+                    maybeStartMain();
+                }
+            }, 10000);
+        }
+
+        // ░░░ 開場打字動畫 ░░░
+        function startIntroTyping() {
+            introText.innerHTML = "";
+            const introLines = introLinesRaw.map(line =>
+                line.replaceAll("{name}", targetName)
+            );
+
+            let lineIndex = 0;
+            let charIndex = 0;
+            let currentLineEl = null;
+
+            function typeNext() {
+                if (lineIndex >= introLines.length) {
+                    // 全部打完，稍微停一下再結束
+                    setTimeout(() => {
+                        introDone = true;
+                        maybeStartMain();
+                    }, 800);
+                    return;
+                }
+
+                const line = introLines[lineIndex];
+
+                if (!currentLineEl) {
+                    currentLineEl = document.createElement("div");
+                    currentLineEl.className = "introLine";
+                    introText.appendChild(currentLineEl);
+                }
+
+                currentLineEl.textContent = line.slice(0, charIndex + 1);
+                charIndex++;
+
+                if (charIndex < line.length) {
+                    setTimeout(typeNext, 70);  // 打字速度
+                } else {
+                    // 一行結束，換下一行
+                    lineIndex++;
+                    charIndex = 0;
+                    currentLineEl = null;
+                    setTimeout(typeNext, 600); // 每行之間停頓一下
+                }
+            }
+
+            typeNext();
+        }
+
+        // ░░░ 開場與預載都完成 → 進入彈窗主世界 ░░░
+        function maybeStartMain() {
+            if (imagesLoaded && introDone) {
+                introScreen.style.display = "none";
+                startPopupLoop();
+            }
+        }
+
         // ░░░ 點「進入」後 ░░░
         enterBtn.onclick = function () {
             const v = nameInput.value.trim();
             targetName = v || "你";
 
+            // 關掉封面
             enterScreen.style.display = "none";
 
+            // 顯示開場文字畫面
+            introScreen.style.display = "flex";
+
+            // 播放音樂（漸漸變大聲）
             bgm.volume = 0;
             bgm.play().catch(() => {});
 
@@ -418,7 +573,9 @@
                 }
             }, 120);
 
-            startPopupLoop();
+            // 同時啟動：預載圖片 + 開場打字動畫
+            preloadImages();
+            startIntroTyping();
         };
 
         // ░░░ 主循環：每一輪隨機彈出 2–4 個 ░░░
@@ -497,7 +654,7 @@
         function showFinal() {
             if (finalShown) return;
             finalShown = true;
-            // 注意：不把 popupRunning 設成 false，讓彈窗在背後繼續跑
+            // 不把 popupRunning 設成 false，讓彈窗在背後繼續跑
 
             const overlay = document.createElement("div");
             overlay.id = "finalScreen";
@@ -526,7 +683,7 @@
             // 按鈕：關閉結尾畫面，回到彈窗世界
             btn.onclick = () => {
                 overlay.remove();
-                // 只關畫面，不重置 finalShown：不再出第二次結局
+                // 不重置 finalShown：不再出第二次結局
             };
 
             box.appendChild(img);
@@ -542,7 +699,9 @@
 
         // ░░░ 點擊畫面時：愛心 + 統計點擊次數 ░░░
         document.addEventListener("click", function (e) {
+            // 封面 or 開場動畫時，都不要出愛心／不要計點擊
             if (enterScreen.style.display !== "none") return;
+            if (introScreen.style.display !== "none") return;
 
             if (!finalShown) {
                 clickCount++;
